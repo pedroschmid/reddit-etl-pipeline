@@ -1,0 +1,60 @@
+x-airflow-common: &airflow-common
+  build:
+    context: .
+    dockerfile: ./Dockerfile
+  env_file:
+    - .env
+  volumes:
+    - ./configs:/opt/airflow/configs
+    - ./dags:/opt/airflow/dags
+    - ./data:/opt/airflow/data
+    - ./etls:/opt/airflow/etls
+    - ./pipelines:/opt/airflow/pipelines
+    - ./utils:/opt/airflow/utils
+    - ./requirements.txt:/opt/airflow/requirements.txt
+  depends_on:
+    - postgres
+    - redis
+
+services:
+  airflow-init:
+    <<: *airflow-common
+    container_name: airflow-init
+    command: >
+      bash -c "pip install -r /opt/airflow/requirements.txt && airflow db init && airflow db upgrade && airflow users create --username airflow --password airflow --role Admin --firstname airflow --lastname airflow --email airflow@airflow.com"
+    restart: "no"
+
+  airflow-webserver:
+    <<: *airflow-common
+    container_name: airflow-webserver
+    command: webserver
+    ports:
+      - "8080:8080"
+
+  airflow-scheduler:
+    <<: *airflow-common
+    container_name: airflow-scheduler
+    command: scheduler
+
+  airflow-worker:
+    <<: *airflow-common
+    container_name: airflow-worker
+    command: celery worker
+
+  postgres:
+    container_name: postgres
+    image: postgres:12
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: airflow_reddit
+      POSTGRES_PORT: 5432
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
