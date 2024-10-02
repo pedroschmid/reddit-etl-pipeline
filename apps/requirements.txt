@@ -1,0 +1,6 @@
+apache-airflow
+pandas
+numpy
+praw
+python-dotenv
+s3fs
