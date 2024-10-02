@@ -21,7 +21,7 @@ With this project, you will learn:
 
 The architecture of this pipeline is designed as follows:
 
-![Project Architecture](images/architecture.png)
+![Project Architecture](images/solution-architecture.png)
 
 ---
 
